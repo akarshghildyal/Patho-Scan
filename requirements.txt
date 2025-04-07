@@ -6,4 +6,4 @@ langchain-anthropic
 python-dotenv
 pydantic
 streamlit
-py2pdf
+PyPDF2
