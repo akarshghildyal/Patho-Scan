@@ -3,13 +3,13 @@ from langchain_openai import ChatOpenAI
 import os, json
 from dotenv import load_dotenv
 from PyPDF2 import PdfReader
-
+import streamlit as st
 load_dotenv()
 
 llm = ChatOpenAI(
     model="openrouter/quasar-alpha",
     openai_api_base="https://openrouter.ai/api/v1",
-    openai_api_key=os.environ.get("OPENROUTER_API_KEY")
+    openai_api_key=st.secrets["OPENROUTER_API_KEY"]
 )
 
 def extract_text_from_pdf(file) -> str:

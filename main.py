@@ -6,6 +6,7 @@ from PyPDF2 import PdfReader
 import os
 from langchain.agents import AgentType, initialize_agent
 from langchain.tools import Tool
+import streamlit as st
 
 load_dotenv()
 
@@ -114,7 +115,7 @@ Provide a structured JSON response with this format:
 if __name__ == "__main__":
     # update the file path to your PDF file
     file_path = "<>"
-    api_key = os.environ.get("OPENROUTER_API_KEY")
+    api_key = st.secrets["OPENROUTER_API_KEY"]
 
     # Initialize LLM
     llm = ChatOpenAI(
