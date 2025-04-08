@@ -92,7 +92,7 @@ if uploaded_file:
                         "📝 *Always discuss these recommendations with your healthcare provider, who can tailor advice and interpret test results in your specific context.*"
                     )
 
-                    status3.update(label="Agent 3 Completed ✅ (Lifestyle Only)", state="complete")
+                    status3.update(label="Agent 3 Completed ✅", state="complete")
 
             except Exception as e:
                 st.error("Agent 3 failed ❌")
