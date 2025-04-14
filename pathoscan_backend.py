@@ -9,7 +9,7 @@ import streamlit as st
 load_dotenv()
 
 llm = ChatOpenAI(
-    model="google/gemini-2.5-pro-exp-03-25:free",
+    model="mistralai/mixtral-8x7b-instruct",
     openai_api_base="https://openrouter.ai/api/v1",
     openai_api_key=st.secrets["OPENROUTER_API_KEY"]
 )
