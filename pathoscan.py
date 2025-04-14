@@ -1,6 +1,6 @@
 import streamlit as st
 import json, os, re
-from pathoscan_backend import extract_text_from_pdf, blood_test_analysis_tool, health_issue_identifier_tool, lifestyle_advice_tool
+from pathoscan_backend import extract_text_from_pdf, blood_test_analysis_tool, health_issue_identifier_tool
 
 st.set_page_config(page_title="🧬 PathoScan", layout="centered")
 st.title("🧬 PathoScan")
@@ -52,8 +52,8 @@ if uploaded_file:
                 issues_json = json.dumps(agent2_data["potential_health_issues"])
                 agent3_output = lifestyle_advice_tool(issues_json)
 
-                if "⚠️" in agent3_output:
-                    raise ValueError("Empty or failed response from LLM")
+                if not agent3_output.strip():
+                    raise ValueError("Empty response from LLM")
 
                 # Clean markdown code blocks
                 cleaned_output = re.sub(r"```(?:json)?\n([\s\S]*?)```", r"\1", agent3_output).strip()
@@ -64,11 +64,9 @@ if uploaded_file:
                     st.json(agent3_data)
                     status3.update(label="Agent 3 Completed ✅", state="complete")
                 except json.JSONDecodeError:
-                    # st.warning("⚠️ Agent 3 returned plain text instead of JSON. Displaying lifestyle section only.")
-
                     st.markdown("### 🧘 Lifestyle Advice")
 
-                    # Try parsing Python-style list
+                    # Try Python-style list parsing
                     lifestyle_list_match = re.search(r"lifestyle_advice\s*=\s*\[(.*?)\]", cleaned_output, re.DOTALL)
                     if lifestyle_list_match:
                         list_items_raw = lifestyle_list_match.group(1)
@@ -77,22 +75,32 @@ if uploaded_file:
                         for item in formatted_items:
                             st.markdown(f"- {item}")
 
-                    # Otherwise, fallback to markdown-style bullets from plain text
-                    elif "-" in cleaned_output:
-                        bullet_lines = [line.lstrip("-• ").strip() for line in cleaned_output.splitlines() if line.strip().startswith("-")]
+                    # If not found, try plain text bullets (including markdown `*` or Unicode `•`)
+                    elif any(b in cleaned_output for b in ["-", "*", "•"]):
+                        bullet_lines = []
+                        for line in cleaned_output.splitlines():
+                            stripped = line.strip(" -*•\t")
+                            # Remove trailing bold markdown artifacts like "**:" or ":" only if they exist
+                            if stripped.endswith("**:"):
+                                stripped = stripped[:-3]
+                            elif stripped.endswith(":**"):
+                                stripped = stripped[:-3]
+                            elif stripped.endswith(":"):
+                                stripped = stripped[:-1]
+                            bullet_lines.append(stripped)
+
                         for line in bullet_lines:
                             st.markdown(f"- {line}")
                     else:
                         st.markdown("_No structured lifestyle advice found, but here’s the full text response:_")
                         st.markdown(f"```\n{cleaned_output}\n```")
 
-                    # Add disclaimer
                     st.markdown("\n---\n")
                     st.markdown(
                         "📝 *Always discuss these recommendations with your healthcare provider, who can tailor advice and interpret test results in your specific context.*"
                     )
 
-                    status3.update(label="Agent 3 Completed ✅ (Lifestyle Only)", state="complete")
+                    status3.update(label="Agent 3 Completed ✅", state="complete")
 
             except Exception as e:
                 st.error("Agent 3 failed ❌")
