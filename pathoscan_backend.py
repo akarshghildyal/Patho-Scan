@@ -69,3 +69,36 @@ Issues: {issues_json}
     # cleaned_response = clean_json_response(response.content) if response else "No response object"
     # print("Cleaned response:\n", cleaned_response)
     return response.content if response else "No response object"
+
+def personalized_chat_tool(question, extracted_text, agent1_data=None, agent2_data=None, agent3_data=None):
+    context = f"""
+    Blood Report Extracted Text:
+    {extracted_text}
+
+    Agent 1 - Blood Test Analysis:
+    {json.dumps(agent1_data or {}, indent=2)}
+
+    Agent 2 - Identified Health Issues:
+    {json.dumps(agent2_data or {}, indent=2)}
+
+    Agent 3 - Lifestyle Advice:
+    {json.dumps(agent3_data or {}, indent=2)}
+
+    Question: {question}
+    """
+
+    system_prompt = """
+    You are a health assistant AI. A user has uploaded their pathology report and received some analysis and lifestyle advice.
+    Use the context from their report and previous analyses to answer their questions precisely and responsibly. Avoid speculative medical advice and always remind them to consult their healthcare provider.
+    """
+
+    response = client.chat.completions.create(
+        model="mistralai/mixtral-8x7b-instruct",  # or other model on OpenRouter
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": context},
+        ],
+        temperature=0.5
+    )
+    print("response.content from model:\n", response.choices[0].message.content if response else "No response object")
+    return response.choices[0].message.content.strip()
