@@ -9,7 +9,7 @@ import streamlit as st
 load_dotenv()
 
 llm = ChatOpenAI(
-     model="deepseek/deepseek-r1-0528-qwen3-8b:free",
+     model="google/gemma-3n-e2b-it:free",
      openai_api_base="https://openrouter.ai/api/v1",
      openai_api_key=st.secrets["OPENROUTER_API_KEY"]
  )
